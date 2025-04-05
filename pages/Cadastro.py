@@ -91,6 +91,16 @@ def cadastro_aluno():
                 st.error(f"Ocorreu um erro inesperado: {e}")
         else:
             st.error("Por favor, preencha todos os campos.")
+def adicionar_coluna_curso():
+    conn, cursor = conectar_db()
+    try:
+        cursor.execute("ALTER TABLE alunos ADD COLUMN curso TEXT;")
+        conn.commit()
+        st.success("Coluna 'curso' adicionada com sucesso!")
+    except sqlite3.OperationalError as e:
+        st.error(f"Erro ao adicionar a coluna 'curso': {e}")
+    finally:
+        conn.close()
 def cadastro_empresa():
     st.title("Cadastro de Empresa")
     nome_empresa = st.text_input("Nome da Empresa")
