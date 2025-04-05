@@ -65,25 +65,30 @@ def cadastro_aluno():
     cpf = st.text_input("CPF")
     email = st.text_input("E-mail")
     senha = st.text_input("Senha", type="password")
-    curso = st.text_input("Curso")          # Novo campo para o curso
-    periodo = st.text_input("Período")      # Novo campo para o período
-    cidade = st.text_input("Cidade")        # Novo campo para a cidade
+    curso = st.text_input("Curso")  # Novo campo para o curso
+    periodo = st.text_input("Período")  # Novo campo para o período
+    cidade = st.text_input("Cidade")  # Novo campo para a cidade
 
     if st.button("Cadastrar Aluno"):
         if nome_completo and ra and cpf and email and senha and curso and periodo and cidade:
-            conn, cursor = conectar_db()
-            cursor.execute("SELECT COUNT(*) FROM alunos WHERE email = ?", (email,))
-            if cursor.fetchone()[0] > 0:
-                st.error("Este e-mail já está cadastrado!")
-            else:
-                hashed_password = bcrypt.hashpw(senha.encode('utf-8'), bcrypt.gensalt())
-                cursor.execute(''' 
-                    INSERT INTO alunos (nome_completo, ra, cpf, email, senha, curso, periodo, cidade) 
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-                ''', (nome_completo, ra, cpf, email, hashed_password, curso, periodo, cidade))
-                conn.commit()
-                st.success("Cadastro realizado com sucesso!")
-            conn.close()
+            try:
+                conn, cursor = conectar_db()
+                cursor.execute("SELECT COUNT(*) FROM alunos WHERE email = ?", (email,))
+                if cursor.fetchone()[0] > 0:
+                    st.error("Este e-mail já está cadastrado!")
+                else:
+                    hashed_password = bcrypt.hashpw(senha.encode('utf-8'), bcrypt.gensalt())
+                    cursor.execute(''' 
+                        INSERT INTO alunos (nome_completo, ra, cpf, email, senha, curso, periodo, cidade) 
+                        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                    ''', (nome_completo, ra, cpf, email, hashed_password, curso, periodo, cidade))
+                    conn.commit()
+                    st.success("Cadastro realizado com sucesso!")
+                conn.close()
+            except sqlite3.OperationalError as e:
+                st.error(f"Ocorreu um erro ao acessar o banco de dados: {e}")
+            except Exception as e:
+                st.error(f"Ocorreu um erro inesperado: {e}")
         else:
             st.error("Por favor, preencha todos os campos.")
 def cadastro_empresa():
